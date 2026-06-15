@@ -8,7 +8,9 @@ export {
   fontWeights,
   lineHeights,
   typography,
+  typographyClasses,
   TypographyPreset,
+  TypographyClass,
   FontSizeToken,
 } from './typography';
 export { spacing, SpacingToken } from './spacing';

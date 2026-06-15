@@ -89,5 +89,19 @@ export const typography = {
   },
 } as const;
 
+// CSS class name references for NativeWind className usage
+// Usage: <Text className={typographyClasses.headingXl}>Hello</Text>
+export const typographyClasses = {
+  headingXl: 'heading-xl',
+  headingLg: 'heading-lg',
+  headingMd: 'heading-md',
+  headingSm: 'heading-sm',
+  bodyLg: 'body-lg',
+  bodyMd: 'body-md',
+  bodySm: 'body-sm',
+  caption: 'caption',
+} as const;
+
 export type TypographyPreset = keyof typeof typography;
+export type TypographyClass = keyof typeof typographyClasses;
 export type FontSizeToken = keyof typeof fontSizes;
