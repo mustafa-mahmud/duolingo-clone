@@ -1,17 +1,13 @@
-import { Text, View } from 'react-native';
+import { View, Text } from 'react-native';
 
-export default function Index() {
+const Home = () => {
+  ///////////////////////////////////////////////////
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <View className="bg-red-500 sm:bg-green-500 md:bg-blue-500 p-5">
-        <Text className="text-white">Responsive test</Text>
-      </View>
+    <View className="btn--secondary">
+      <Text>Home</Text>
+      <Text className="font-poppins-bold color-primary-dark">Button</Text>
     </View>
   );
-}
+};
+
+export default Home;

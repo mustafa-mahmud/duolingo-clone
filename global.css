@@ -3,3 +3,365 @@
 @import 'tailwindcss/utilities.css';
 
 @import 'nativewind/theme';
+
+/* ============================================
+   DESIGN SYSTEM - Duolingo Clone Theme Tokens
+   ============================================ */
+
+@theme {
+  /* --- Colors --- */
+  --color-primary: #58cc02;
+  --color-primary-dark: #46a302;
+  --color-primary-light: #89e219;
+
+  --color-secondary: #1cb0f6;
+  --color-secondary-dark: #1899d6;
+  --color-secondary-light: #4fc3f6;
+
+  --color-error: #ff4b4b;
+  --color-error-dark: #ea2b2b;
+  --color-error-light: #ff7070;
+
+  --color-warning: #ffc800;
+  --color-warning-dark: #e5a900;
+  --color-warning-light: #ffd84d;
+
+  --color-purple: #ce82ff;
+  --color-purple-dark: #b566e0;
+  --color-purple-light: #d99bff;
+
+  --color-gold: #ffc800;
+
+  --color-white: #ffffff;
+  --color-surface: #f7f7f7;
+  --color-border: #e5e5e5;
+  --color-swan: #dddddd;
+
+  --color-text-primary: #3c3c3c;
+  --color-text-secondary: #777777;
+  --color-text-tertiary: #afafaf;
+
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  /* --- Font Families --- */
+  --font-poppins-regular: 'Poppins-Regular';
+  --font-poppins-medium: 'Poppins-Medium';
+  --font-poppins-semibold: 'Poppins-SemiBold';
+  --font-poppins-bold: 'Poppins-Bold';
+
+  /* --- Font Sizes --- */
+  --font-size-heading-xl: 30px;
+  --font-size-heading-lg: 24px;
+  --font-size-heading-md: 20px;
+  --font-size-heading-sm: 18px;
+  --font-size-body-lg: 18px;
+  --font-size-body-md: 16px;
+  --font-size-body-sm: 14px;
+  --font-size-caption: 12px;
+
+  /* --- Spacing (4px base unit) --- */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+
+  /* --- Border Radius --- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-large: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   BEM UTILITIES - Reusable class patterns
+   
+   Note: :active pseudo-classes are NOT used here
+   because Pressable pressed states must use the
+   style prop callback per AGENTS.md exception rules.
+   See components for pressed state handling.
+   ============================================ */
+
+/* --- Buttons --- */
+
+.btn--primary {
+  background-color: var(--color-primary);
+  border-bottom-width: 4px;
+  border-bottom-color: var(--color-primary-dark);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-xl);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-body-md);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.btn--secondary {
+  background-color: var(--color-secondary);
+  border-bottom-width: 4px;
+  border-bottom-color: var(--color-secondary-dark);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-xl);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-body-md);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.btn--error {
+  background-color: var(--color-error);
+  border-bottom-width: 4px;
+  border-bottom-color: var(--color-error-dark);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-xl);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-body-md);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.btn--warning {
+  background-color: var(--color-warning);
+  border-bottom-width: 4px;
+  border-bottom-color: var(--color-warning-dark);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-xl);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.btn--purple {
+  background-color: var(--color-purple);
+  border-bottom-width: 4px;
+  border-bottom-color: var(--color-purple-dark);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-xl);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-body-md);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.btn--outline {
+  background-color: var(--color-white);
+  border-width: 2px;
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-xl);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.btn--disabled {
+  background-color: var(--color-swan);
+  border-bottom-width: 4px;
+  border-bottom-color: var(--color-border);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-xl);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-body-md);
+  color: var(--color-white);
+  text-align: center;
+  opacity: 0.6;
+}
+
+/* --- Cards --- */
+
+.card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-medium);
+}
+
+.card--surface {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.card--bordered {
+  background-color: var(--color-white);
+  border-width: 1px;
+  border-color: var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+/* --- Input Fields --- */
+
+.input {
+  background-color: var(--color-white);
+  border-width: 2px;
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-lg);
+  font-family: var(--font-poppins-regular);
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-primary);
+}
+
+.input--focused {
+  background-color: var(--color-white);
+  border-width: 2px;
+  border-color: var(--color-primary);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-lg);
+  font-family: var(--font-poppins-regular);
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-primary);
+}
+
+.input--error {
+  background-color: var(--color-white);
+  border-width: 2px;
+  border-color: var(--color-error);
+  border-radius: var(--radius-md);
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-lg);
+  font-family: var(--font-poppins-regular);
+  font-size: var(--font-size-body-md);
+  color: var(--color-error);
+}
+
+/* --- Progress Bar --- */
+
+.progress-bar {
+  background-color: var(--color-swan);
+  border-radius: var(--radius-full);
+  height: 12px;
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  height: 100%;
+}
+
+.progress-bar__fill--secondary {
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-full);
+  height: 100%;
+}
+
+.progress-bar__fill--error {
+  background-color: var(--color-error);
+  border-radius: var(--radius-full);
+  height: 100%;
+}
+
+.progress-bar__fill--warning {
+  background-color: var(--color-warning);
+  border-radius: var(--radius-full);
+  height: 100%;
+}
+
+.progress-bar__fill--purple {
+  background-color: var(--color-purple);
+  border-radius: var(--radius-full);
+  height: 100%;
+}
+
+/* --- Badge --- */
+
+.badge {
+  border-radius: var(--radius-full);
+  padding-block: var(--spacing-xs);
+  padding-inline: var(--spacing-sm);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+.badge--primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  padding-block: var(--spacing-xs);
+  padding-inline: var(--spacing-sm);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+.badge--secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  padding-block: var(--spacing-xs);
+  padding-inline: var(--spacing-sm);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+.badge--error {
+  background-color: var(--color-error);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  padding-block: var(--spacing-xs);
+  padding-inline: var(--spacing-sm);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+.badge--warning {
+  background-color: var(--color-warning);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-full);
+  padding-block: var(--spacing-xs);
+  padding-inline: var(--spacing-sm);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+.badge--purple {
+  background-color: var(--color-purple);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  padding-block: var(--spacing-xs);
+  padding-inline: var(--spacing-sm);
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+/* --- Section Headers --- */
+
+.section-header {
+  font-family: var(--font-poppins-bold);
+  font-size: var(--font-size-heading-md);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.section-subheader {
+  font-family: var(--font-poppins-medium);
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
