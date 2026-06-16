@@ -92,10 +92,10 @@ const Onboarding = () => {
             />
             <Text className="heading-md text-fuchsia-700 ml-sm">muolingo</Text>
           </View>
-          <Text className="heading-sm text-text-primary mt-md">
-            Your AI Language Teacher
+          <Text className="heading-md text-text-primary mt-md">
+            Your AI Language <Text className="text-fuchsia-700">Teacher</Text>
           </Text>
-          <Text className="body-md text-text-secondary mt-xs">
+          <Text className="body-sm text-text-secondary mt-xs text-center">
             Real conversations with AI characters anywhere, anytimes.
           </Text>
         </View>
