@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 
 const Home = () => {
   return (
-    <View className="flex-1 items-center justify-center bg-primary">
+    <View className="flex-1 items-center justify-cente">
       <Text className="heading-xl text-white">Home</Text>
       <Pressable
         className="btn--outline mt-xl"

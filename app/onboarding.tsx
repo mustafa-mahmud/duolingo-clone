@@ -1,6 +1,7 @@
 import { View, Text, Image, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { images } from '@/constants/images';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const greetings = [
   {
@@ -93,7 +94,7 @@ const Onboarding = () => {
             <Text className="heading-md text-fuchsia-700 ml-sm">muolingo</Text>
           </View>
           <Text className="heading-md text-text-primary mt-md">
-            Your AI Language <Text className="text-fuchsia-700">Teacher</Text>
+            Your AI Language <Text className="text-fuchsia-700">Teacher.</Text>
           </Text>
           <Text className="body-sm text-text-secondary mt-xs text-center">
             Real conversations with AI characters anywhere, anytimes.
@@ -124,9 +125,9 @@ const Onboarding = () => {
         </View>
 
         {/* Bottom Button */}
-        <View className="w-full px-xl pb-lg">
+        <View className="w-full px-xl">
           <Pressable
-            className="btn--purple"
+            className="btn--purple items-center justify-center"
             style={({ pressed }) => [
               pressed && {
                 borderBottomWidth: 2,
@@ -135,8 +136,13 @@ const Onboarding = () => {
             ]}
             onPress={() => {}}
           >
-            <Text className="font-poppins-bold text-white text-body-md text-center">
+            <Text className="font-poppins-bold text-white text-[12px] text-center items-center">
               GET STARTED
+              <Ionicons
+                name="chevron-forward-outline"
+                size={12}
+                color="white"
+              />
             </Text>
           </Pressable>
         </View>
