@@ -1,4 +1,5 @@
 import { View, Text, Image, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { images } from '@/constants/images';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -134,7 +135,7 @@ const Onboarding = () => {
                 transform: [{ translateY: 2 }],
               },
             ]}
-            onPress={() => {}}
+            onPress={() => router.push('/sign-up')}
           >
             <Text className="font-poppins-bold text-white text-[12px] text-center items-center">
               GET STARTED
