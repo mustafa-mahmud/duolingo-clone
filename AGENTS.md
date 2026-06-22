@@ -494,3 +494,7 @@ Before every feature implementation:
 - Follow it strictly
 - Build clean, simple, teachable code
 - Replicate UI exactly when designs are provided
+
+## Important
+
+- Once all tasks are complete, create a concise migration summary in `NEXT_SUMMARY.md` to serve as context for future tasks.
