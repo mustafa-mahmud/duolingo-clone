@@ -2,36 +2,50 @@
 
 ## Scope completed
 
-- Configured Clerk at the Expo Router root with `ClerkProvider` in `app/_layout.tsx`.
-- Passed `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` explicitly from Expo environment variables.
-- Wired Clerk token persistence through `tokenCache` from `@clerk/expo/token-cache`, which uses Expo SecureStore and is compatible with Expo SDK 54 / Expo Go.
-- Added `ClerkLoaded` so the app waits for Clerk initialization before rendering the navigator.
-- Kept the splash screen visible until both fonts and Clerk are ready.
+- Replaced root-level mocked/placeholder authentication wiring with Clerk session reads from `useAuth()`.
+- Connected root-level user state reads through `useUser()`.
+- Wrapped the Expo Router root navigator with `ClerkProvider` and `ClerkLoaded`.
+- Kept existing route definitions and navigation behavior unchanged.
+- Did not implement sign-in or sign-up flows.
+- Did not modify the existing auth screen UI.
 
-## Environment requirement
+## Clerk state now available
 
-- The app requires `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` to be defined before startup.
-- If the key is missing, the root layout throws an explicit startup error to avoid a partially configured auth state.
+- `useAuth()` is read in the root navigator for:
+  - loaded state
+  - signed-in state
+  - user id
+  - session id
+- `useUser()` is read in the root navigator for:
+  - loaded state
+  - signed-in state
+  - Clerk user object
+
+## Removed mock auth dependency
+
+- No global fake login status, mocked auth store, or hardcoded authenticated flag was found in the active app code.
+- Existing email/verification UI remains temporary UI only and does not create a Clerk session.
+- The verification modal still collects six digits and calls `onVerify`, but it does not authenticate or redirect.
 
 ## Dependency check
 
-- `@clerk/expo` is already installed.
-- `expo-secure-store` is already installed.
+- `@clerk/expo` is already installed and reused.
+- `expo-secure-store` is already installed and reused through Clerk `tokenCache`.
 - No packages were installed or reinstalled.
+
+## Not changed
+
+- No sign-in implementation.
+- No sign-up implementation.
+- No route protection.
+- No redirects based on auth state.
+- No UI redesign.
 
 ## Files modified in this step
 
 - `app/_layout.tsx`
 - `NEXT_SUMMARY.md`
 
-## Not changed
-
-- No sign-in implementation.
-- No sign-up implementation.
-- No auth screen UI changes.
-- No route protection changes.
-- No navigation redesign.
-
 ## Next likely step
 
-- Add auth actions that use the existing Clerk provider setup without changing route protection until explicitly requested.
+- Implement real Clerk sign-in/sign-up actions in the existing auth screens when explicitly requested.

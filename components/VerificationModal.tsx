@@ -9,7 +9,6 @@ import {
   Keyboard,
 } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
-import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 type VerificationModalProps = {
@@ -39,21 +38,11 @@ export function VerificationModal({
     }
   }, [visible]);
 
-  // Auto-navigate when 6th digit is entered
   useEffect(() => {
     if (code.length === 6 && !hasCompletedRef.current) {
       hasCompletedRef.current = true;
-
-      // Dismiss keyboard
       Keyboard.dismiss();
-
-      // Notify parent with the code
       onVerify(code);
-
-      // Navigate to home after a brief delay for visual feedback
-      setTimeout(() => {
-        router.replace('/');
-      }, 300);
     }
   }, [code, onVerify]);
 
@@ -109,7 +98,7 @@ export function VerificationModal({
 
           {/* Description */}
           <Text className="body-md text-text-secondary text-center mb-2">
-            We've sent a verification code to
+            {"We've sent a verification code to"}
           </Text>
           <Text className="body-md font-poppins-bold text-text-primary text-center mb-8">
             {email}
@@ -165,7 +154,7 @@ export function VerificationModal({
           {/* Resend Link */}
           <View className="flex-row justify-center">
             <Text className="body-sm text-text-secondary">
-              Didn't receive the code?{' '}
+              {"Didn't receive the code?"}{' '}
             </Text>
             <Pressable>
               <Text className="body-sm font-poppins-bold text-primary">
