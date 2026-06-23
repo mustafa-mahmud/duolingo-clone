@@ -1,41 +1,42 @@
-# Next Migration Summary (12)
+# Next Migration Summary (13)
 
 ## Scope completed
 
 - Read and followed `AGENTS.md` before making implementation decisions.
-- Verified the existing Clerk, Expo Router, Expo SDK, and Expo Go-compatible dependencies in `package.json`.
-- Confirmed no new package installation is needed for logout.
-- Updated `COMPATIBILITY_REPORT.md` before changing logout code.
-- Preserved the existing UI structure and NativeWind class patterns.
+- Re-verified the installed Expo SDK 54, Expo Go-compatible Clerk, Expo Router, WebBrowser, Linking, AuthSession, and SecureStore dependencies in `package.json`.
+- Updated `COMPATIBILITY_REPORT.md` before removing authentication cleanup code.
+- Searched app, auth screens, components, and scripts for mock authentication, fake users, temporary auth state, unused auth helpers, and dead auth code.
+- Preserved existing Clerk auth screens, route protection, logout, OAuth, and verification UI state because those are active Clerk flows.
 
-## Logout implemented
+## Authentication cleanup completed
 
-- Replaced the old onboarding navigation mock logout behavior on the home screen.
-- Home now uses Clerk `useAuth()` from `@clerk/clerk-expo`.
-- Logout now calls Clerk `signOut()`.
-- After `signOut()` resolves, the app navigates to `/onboarding` with Expo Router `router.replace()`.
-- Added a local signing-out guard to prevent duplicate logout taps.
-- The button label changes to `Logging out...` while logout is in progress.
+- Removed the dead Clerk native diagnostic helper at `scripts/diagnose-clerk-native.js`.
+- The removed helper referenced the older `@clerk/expo` package name and native-module diagnostics that are not part of the current Expo Go authentication implementation.
+- Confirmed there are no remaining mock auth users, fake user objects, custom auth stores, custom auth state, or mock login/logout helpers in the active app/auth/component TypeScript files.
+- Left real Clerk APIs as the only authentication path: `ClerkProvider`, `tokenCache`, `useAuth()`, `useSignIn()`, `useSignUp()`, and `useSSO()` from `@clerk/clerk-expo`.
 
 ## Compatibility notes
 
 - Existing `@clerk/clerk-expo` dependency is reused.
-- Existing `expo-router` dependency is reused.
-- No new dependency was installed.
-- No custom native module, Clerk native module, config plugin, prebuild, EAS build, or development-build-only feature was introduced.
-- Implementation remains compatible with Expo SDK 54 and standard Expo Go.
-- Logout uses JavaScript Clerk session state and Expo Router navigation only.
-- This implementation should not trigger `Cannot find native module 'ClerkExpo'`.
+- Existing Expo SDK dependencies are reused.
+- No package was installed.
+- No Expo SDK version was changed.
+- No native module, config plugin, prebuild, EAS build, or development-build-only feature was added.
+- Cleanup remains compatible with Expo SDK 54 and standard Expo Go.
+- The app continues to avoid native-only Clerk APIs that could trigger `Cannot find native module 'ClerkExpo'`.
 
 ## Validation completed
 
 - `npm run lint` completed successfully.
 - `npx tsc --noEmit` completed successfully.
 
-## Files touched in this step
+## Files deleted in this step
+
+- `scripts/diagnose-clerk-native.js`
+
+## Files modified in this step
 
 - `COMPATIBILITY_REPORT.md`
-- `app/index.tsx`
 - `NEXT_SUMMARY.md`
 
 ## Not implemented yet

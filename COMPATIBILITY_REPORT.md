@@ -171,6 +171,29 @@ This logout implementation uses only:
 
 It does not add or use a Clerk native module. Because logout depends only on `useAuth().signOut()` and Expo Router JavaScript navigation, it will not trigger `Cannot find native module 'ClerkExpo'`.
 
+## Authentication cleanup update
+
+The authentication cleanup step will not add or install any packages.
+
+### Clerk APIs kept
+
+- `ClerkProvider` from `@clerk/clerk-expo`
+- `tokenCache` from `@clerk/clerk-expo/token-cache`
+- `useAuth()` from `@clerk/clerk-expo`
+- `useSignIn()` from `@clerk/clerk-expo`
+- `useSignUp()` from `@clerk/clerk-expo`
+- `useSSO()` from `@clerk/clerk-expo`
+
+These APIs are already in use and remain compatible with standard Expo Go because they run through Clerk's Expo JavaScript APIs plus existing Expo SDK packages.
+
+### Cleanup scope
+
+The cleanup will remove only mock, fake, temporary, unused, or dead authentication code if present. It will not remove the local UI state required for live Clerk flows, such as verification modal visibility, submitting flags, verification flags, and social sign-in button disabling.
+
+### Why this remains Expo Go compatible
+
+This step does not introduce any new auth package, native module, config plugin, prebuild requirement, EAS build requirement, or development-build-only feature. Keeping only the existing Clerk Expo APIs ensures the app continues to avoid native-only Clerk APIs and should not trigger `Cannot find native module 'ClerkExpo'`.
+
 ## Implementation decision
 
 Proceed with the existing Expo Go-compatible stack:
