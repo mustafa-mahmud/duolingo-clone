@@ -1,4 +1,12 @@
-import { View, Text, Pressable, TextInput, ScrollView } from 'react-native';
+import { useSignUp } from '@clerk/clerk-expo';
+import {
+  View,
+  Text,
+  Pressable,
+  TextInput,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthHeader } from '@/components/AuthHeader';
@@ -7,20 +15,72 @@ import { AuthSocialButtons } from '@/components/AuthSocialButtons';
 import { AuthFooter } from '@/components/AuthFooter';
 import { VerificationModal } from '@/components/VerificationModal';
 
-export default function SignUp() {
-  const [showVerification, setShowVerification] = useState(false);
-  const [email, setEmail] = useState('');
+function getClerkErrorMessage(error: unknown) {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'errors' in error &&
+    Array.isArray(error.errors) &&
+    error.errors[0]?.message
+  ) {
+    return String(error.errors[0].message);
+  }
 
-  const handleCreateAccount = () => {
-    if (email.trim()) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Unable to create your account. Please try again.';
+}
+
+export default function SignUp() {
+  const { isLoaded, setActive, signUp } = useSignUp();
+  const [showVerification, setShowVerification] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleCreateAccount = async () => {
+    const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
+
+    if (!isLoaded || !signUp || !trimmedEmail || isSubmitting) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await signUp.create({
+        emailAddress: trimmedEmail,
+        firstName: trimmedName || undefined,
+      });
+
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+
+      setEmail(trimmedEmail);
       setShowVerification(true);
+    } catch (error) {
+      Alert.alert('Sign up failed', getClerkErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleVerify = (code: string) => {
-    // Verification handled internally by VerificationModal
-    // onVerify is called for logging/analytics
-    console.log('Verification code:', code);
+  const handleVerify = async (code: string) => {
+    if (!isLoaded || !signUp) {
+      return;
+    }
+
+    try {
+      const result = await signUp.attemptEmailAddressVerification({ code });
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        setShowVerification(false);
+      }
+    } catch (error) {
+      Alert.alert('Verification failed', getClerkErrorMessage(error));
+    }
   };
 
   return (
@@ -45,6 +105,8 @@ export default function SignUp() {
             placeholder="Your name"
             placeholderTextColor="#AFAFAF"
             autoCapitalize="words"
+            value={name}
+            onChangeText={setName}
           />
         </View>
 
@@ -69,6 +131,7 @@ export default function SignUp() {
         <Pressable
           className="btn--primary mt-2 mb-6"
           onPress={handleCreateAccount}
+          disabled={isSubmitting}
         >
           <Text className="font-poppins-bold text-white text-center text-body-md">
             CREATE ACCOUNT
