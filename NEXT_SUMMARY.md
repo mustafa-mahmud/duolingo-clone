@@ -1,23 +1,21 @@
-# Next Migration Summary (11)
+# Next Migration Summary (12)
 
 ## Scope completed
 
 - Read and followed `AGENTS.md` before making implementation decisions.
-- Verified existing Clerk, Expo Router, and Expo SDK dependencies in `package.json` before considering packages.
-- Confirmed no new packages are needed for route protection.
-- Updated `COMPATIBILITY_REPORT.md` before writing route protection code.
-- Preserved the existing UI design and NativeWind styling patterns.
-- Used Clerk session state only for auth access decisions.
+- Verified the existing Clerk, Expo Router, Expo SDK, and Expo Go-compatible dependencies in `package.json`.
+- Confirmed no new package installation is needed for logout.
+- Updated `COMPATIBILITY_REPORT.md` before changing logout code.
+- Preserved the existing UI structure and NativeWind class patterns.
 
-## Route protection implemented
+## Logout implemented
 
-- Root navigation now uses Clerk `useAuth()` from `@clerk/clerk-expo`.
-- Route access waits for both app fonts and Clerk auth state before rendering routes.
-- While Clerk session state is loading, no route tree is rendered, preventing unauthorized screen flicker.
-- Authenticated users can access the home route at `/`.
-- Unauthenticated users can access onboarding and auth routes.
-- Expo Router `Stack.Protected` guards private and public route branches declaratively.
-- The auth group `(auth)` remains nested and keeps its existing `sign-in` and `sign-up` screens.
+- Replaced the old onboarding navigation mock logout behavior on the home screen.
+- Home now uses Clerk `useAuth()` from `@clerk/clerk-expo`.
+- Logout now calls Clerk `signOut()`.
+- After `signOut()` resolves, the app navigates to `/onboarding` with Expo Router `router.replace()`.
+- Added a local signing-out guard to prevent duplicate logout taps.
+- The button label changes to `Logging out...` while logout is in progress.
 
 ## Compatibility notes
 
@@ -26,7 +24,7 @@
 - No new dependency was installed.
 - No custom native module, Clerk native module, config plugin, prebuild, EAS build, or development-build-only feature was introduced.
 - Implementation remains compatible with Expo SDK 54 and standard Expo Go.
-- Route protection uses JavaScript Clerk session state and Expo Router navigation configuration only.
+- Logout uses JavaScript Clerk session state and Expo Router navigation only.
 - This implementation should not trigger `Cannot find native module 'ClerkExpo'`.
 
 ## Validation completed
@@ -37,7 +35,7 @@
 ## Files touched in this step
 
 - `COMPATIBILITY_REPORT.md`
-- `app/_layout.tsx`
+- `app/index.tsx`
 - `NEXT_SUMMARY.md`
 
 ## Not implemented yet

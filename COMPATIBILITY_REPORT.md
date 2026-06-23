@@ -20,11 +20,13 @@ No new packages are required for this OAuth implementation.
 
 This project already uses `@clerk/clerk-expo` for Clerk React Native / Expo authentication.
 
-It provides the APIs needed for this task:
+It provides the APIs needed across the current Clerk migration work:
 
 - `ClerkProvider`
 - `useSSO()`
 - `setActive()` returned by Clerk's SSO flow
+- `useAuth()` for route protection and logout
+- `signOut()` returned by `useAuth()`
 
 The implementation will continue using the existing installed package instead of adding another Clerk package.
 
@@ -142,6 +144,33 @@ This implementation uses only:
 
 It does not add or use any Clerk native module. Because route protection depends only on `useAuth()` session state and Expo Router's JavaScript navigator configuration, it will not trigger `Cannot find native module 'ClerkExpo'`.
 
+## Logout update
+
+The logout step will reuse the existing installed stack and will not install new packages.
+
+### Clerk APIs used
+
+- `useAuth()` from `@clerk/clerk-expo`
+- `signOut()` returned by `useAuth()`
+
+`signOut()` is part of Clerk's JavaScript auth resource API exposed by the existing Expo package. Calling it from an already-rendered React Native screen does not require a custom native module, development build, EAS build, prebuild, config plugin, or handwritten native code.
+
+### Expo Router APIs used
+
+- `router.replace('/onboarding')` from `expo-router`
+
+After `signOut()` resolves, navigation will replace the current private route with onboarding. This uses Expo Router's JavaScript navigation API and relies on the existing route protection to keep unauthenticated users in the public route branch.
+
+### Why this remains Expo Go compatible
+
+This logout implementation uses only:
+
+- existing `@clerk/clerk-expo`
+- existing `expo-router`
+- Clerk JavaScript session state
+
+It does not add or use a Clerk native module. Because logout depends only on `useAuth().signOut()` and Expo Router JavaScript navigation, it will not trigger `Cannot find native module 'ClerkExpo'`.
+
 ## Implementation decision
 
 Proceed with the existing Expo Go-compatible stack:
@@ -160,3 +189,5 @@ Proceed with the existing Expo Go-compatible stack:
 - Use `useAuth()` session state only for route access.
 - Use `Stack.Protected` to guard private and public route groups.
 - Wait for Clerk auth state before rendering protected routes.
+- Replace the old onboarding navigation mock logout with Clerk `signOut()`.
+- Navigate to onboarding with Expo Router after sign-out completes.
