@@ -1,5 +1,13 @@
-import { View, Text, Pressable, TextInput, ScrollView } from 'react-native';
-import { useState } from 'react';
+import { useSignIn } from '@clerk/clerk-expo';
+import {
+  View,
+  Text,
+  Pressable,
+  TextInput,
+  ScrollView,
+  Alert,
+} from 'react-native';
+import { useCallback, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthHeader } from '@/components/AuthHeader';
 import { AuthDivider } from '@/components/AuthDivider';
@@ -7,20 +15,58 @@ import { AuthSocialButtons } from '@/components/AuthSocialButtons';
 import { AuthFooter } from '@/components/AuthFooter';
 import { VerificationModal } from '@/components/VerificationModal';
 
+function getClerkErrorMessage(error: unknown) {
+  const clerkError =
+    typeof error === 'object' &&
+    error !== null &&
+    'errors' in error &&
+    Array.isArray(error.errors)
+      ? error.errors[0]
+      : null;
+
+  if (clerkError?.message) {
+    return String(clerkError.message);
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Unable to request a verification code. Please try again.';
+}
+
 export default function SignIn() {
+  const { isLoaded, signIn } = useSignIn();
   const [showVerification, setShowVerification] = useState(false);
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSignIn = () => {
-    if (email.trim()) {
+  const handleSignIn = async () => {
+    const trimmedEmail = email.trim();
+
+    if (!isLoaded || !signIn || !trimmedEmail || isSubmitting) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await signIn.create({
+        identifier: trimmedEmail,
+        strategy: 'email_code',
+      });
+
+      setEmail(trimmedEmail);
       setShowVerification(true);
+    } catch (error) {
+      Alert.alert('Sign in failed', getClerkErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleVerify = (code: string) => {
-    // Verification handled internally by VerificationModal
-    console.log('Verification code:', code);
-  };
+  const handleVerify = useCallback(() => {
+    // Sign-in verification submission will be implemented in the next step.
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
@@ -52,7 +98,11 @@ export default function SignIn() {
         </View>
 
         {/* Sign In Button */}
-        <Pressable className="btn--primary mt-2 mb-6" onPress={handleSignIn}>
+        <Pressable
+          className="btn--primary mt-2 mb-6"
+          onPress={handleSignIn}
+          disabled={isSubmitting}
+        >
           <Text className="font-poppins-bold text-white text-center text-body-md">
             SIGN IN
           </Text>
