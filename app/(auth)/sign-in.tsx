@@ -1,4 +1,5 @@
 import { useSignIn } from '@clerk/clerk-expo';
+import { router } from 'expo-router';
 import {
   View,
   Text,
@@ -35,11 +36,42 @@ function getClerkErrorMessage(error: unknown) {
   return 'Unable to request a verification code. Please try again.';
 }
 
+function getVerificationErrorMessage(error: unknown) {
+  const clerkError =
+    typeof error === 'object' &&
+    error !== null &&
+    'errors' in error &&
+    Array.isArray(error.errors)
+      ? error.errors[0]
+      : null;
+  const code = clerkError?.code ? String(clerkError.code).toLowerCase() : '';
+  const message = clerkError?.message
+    ? String(clerkError.message)
+    : 'Unable to verify your email. Please try again.';
+
+  if (code.includes('expired') || message.toLowerCase().includes('expired')) {
+    return 'This verification code has expired. Please request a new code and try again.';
+  }
+
+  if (
+    code.includes('incorrect') ||
+    code.includes('invalid') ||
+    message.toLowerCase().includes('incorrect') ||
+    message.toLowerCase().includes('invalid')
+  ) {
+    return 'Invalid verification code. Please check the code and try again.';
+  }
+
+  return message;
+}
+
 export default function SignIn() {
-  const { isLoaded, signIn } = useSignIn();
+  const { isLoaded, setActive, signIn } = useSignIn();
   const [showVerification, setShowVerification] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState('');
 
   const handleSignIn = async () => {
     const trimmedEmail = email.trim();
@@ -55,6 +87,7 @@ export default function SignIn() {
         strategy: 'email_code',
       });
 
+      setVerificationError('');
       setEmail(trimmedEmail);
       setShowVerification(true);
     } catch (error) {
@@ -64,9 +97,48 @@ export default function SignIn() {
     }
   };
 
-  const handleVerify = useCallback(() => {
-    // Sign-in verification submission will be implemented in the next step.
-  }, []);
+  const handleVerify = useCallback(
+    async (code: string) => {
+      if (!isLoaded || !signIn || isVerifying) {
+        return;
+      }
+
+      try {
+        setIsVerifying(true);
+        setVerificationError('');
+
+        const result = await signIn.attemptFirstFactor({
+          strategy: 'email_code',
+          code,
+        });
+
+        if (result.status === 'complete' && result.createdSessionId) {
+          await setActive({ session: result.createdSessionId });
+          setShowVerification(false);
+          router.replace('/');
+          return;
+        }
+
+        setVerificationError(
+          'Verification is not complete yet. Please try again.',
+        );
+      } catch (error) {
+        setVerificationError(getVerificationErrorMessage(error));
+      } finally {
+        setIsVerifying(false);
+      }
+    },
+    [isLoaded, isVerifying, setActive, signIn],
+  );
+
+  const handleCloseVerification = () => {
+    if (isVerifying) {
+      return;
+    }
+
+    setShowVerification(false);
+    setVerificationError('');
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
@@ -104,7 +176,7 @@ export default function SignIn() {
           disabled={isSubmitting}
         >
           <Text className="font-poppins-bold text-white text-center text-body-md">
-            SIGN IN
+            {isSubmitting ? 'SIGNING IN...' : 'SIGN IN'}
           </Text>
         </Pressable>
 
@@ -121,8 +193,10 @@ export default function SignIn() {
       <VerificationModal
         visible={showVerification}
         email={email}
-        onClose={() => setShowVerification(false)}
+        onClose={handleCloseVerification}
         onVerify={handleVerify}
+        isVerifying={isVerifying}
+        errorMessage={verificationError}
       />
     </SafeAreaView>
   );
