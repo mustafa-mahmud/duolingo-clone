@@ -1,4 +1,5 @@
 import { useSignUp } from '@clerk/clerk-expo';
+import { router } from 'expo-router';
 import {
   View,
   Text,
@@ -16,14 +17,16 @@ import { AuthFooter } from '@/components/AuthFooter';
 import { VerificationModal } from '@/components/VerificationModal';
 
 function getClerkErrorMessage(error: unknown) {
-  if (
+  const clerkError =
     typeof error === 'object' &&
     error !== null &&
     'errors' in error &&
-    Array.isArray(error.errors) &&
-    error.errors[0]?.message
-  ) {
-    return String(error.errors[0].message);
+    Array.isArray(error.errors)
+      ? error.errors[0]
+      : null;
+
+  if (clerkError?.message) {
+    return String(clerkError.message);
   }
 
   if (error instanceof Error) {
@@ -33,12 +36,43 @@ function getClerkErrorMessage(error: unknown) {
   return 'Unable to create your account. Please try again.';
 }
 
+function getVerificationErrorMessage(error: unknown) {
+  const clerkError =
+    typeof error === 'object' &&
+    error !== null &&
+    'errors' in error &&
+    Array.isArray(error.errors)
+      ? error.errors[0]
+      : null;
+  const code = clerkError?.code ? String(clerkError.code).toLowerCase() : '';
+  const message = clerkError?.message
+    ? String(clerkError.message)
+    : 'Unable to verify your email. Please try again.';
+
+  if (code.includes('expired') || message.toLowerCase().includes('expired')) {
+    return 'This verification code has expired. Please request a new code and try again.';
+  }
+
+  if (
+    code.includes('incorrect') ||
+    code.includes('invalid') ||
+    message.toLowerCase().includes('incorrect') ||
+    message.toLowerCase().includes('invalid')
+  ) {
+    return 'Invalid verification code. Please check the code and try again.';
+  }
+
+  return message;
+}
+
 export default function SignUp() {
   const { isLoaded, setActive, signUp } = useSignUp();
   const [showVerification, setShowVerification] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState('');
 
   const handleCreateAccount = async () => {
     const trimmedEmail = email.trim();
@@ -57,6 +91,7 @@ export default function SignUp() {
 
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
 
+      setVerificationError('');
       setEmail(trimmedEmail);
       setShowVerification(true);
     } catch (error) {
@@ -67,20 +102,40 @@ export default function SignUp() {
   };
 
   const handleVerify = async (code: string) => {
-    if (!isLoaded || !signUp) {
+    if (!isLoaded || !signUp || isVerifying) {
       return;
     }
 
     try {
+      setIsVerifying(true);
+      setVerificationError('');
+
       const result = await signUp.attemptEmailAddressVerification({ code });
 
-      if (result.status === 'complete') {
+      if (result.status === 'complete' && result.createdSessionId) {
         await setActive({ session: result.createdSessionId });
         setShowVerification(false);
+        router.replace('/');
+        return;
       }
+
+      setVerificationError(
+        'Verification is not complete yet. Please try again.',
+      );
     } catch (error) {
-      Alert.alert('Verification failed', getClerkErrorMessage(error));
+      setVerificationError(getVerificationErrorMessage(error));
+    } finally {
+      setIsVerifying(false);
     }
+  };
+
+  const handleCloseVerification = () => {
+    if (isVerifying) {
+      return;
+    }
+
+    setShowVerification(false);
+    setVerificationError('');
   };
 
   return (
@@ -134,7 +189,7 @@ export default function SignUp() {
           disabled={isSubmitting}
         >
           <Text className="font-poppins-bold text-white text-center text-body-md">
-            CREATE ACCOUNT
+            {isSubmitting ? 'CREATING...' : 'CREATE ACCOUNT'}
           </Text>
         </Pressable>
 
@@ -151,8 +206,10 @@ export default function SignUp() {
       <VerificationModal
         visible={showVerification}
         email={email}
-        onClose={() => setShowVerification(false)}
+        onClose={handleCloseVerification}
         onVerify={handleVerify}
+        isVerifying={isVerifying}
+        errorMessage={verificationError}
       />
     </SafeAreaView>
   );

@@ -16,6 +16,8 @@ type VerificationModalProps = {
   email: string;
   onClose: () => void;
   onVerify: (code: string) => void;
+  isVerifying?: boolean;
+  errorMessage?: string;
 };
 
 export function VerificationModal({
@@ -23,6 +25,8 @@ export function VerificationModal({
   email,
   onClose,
   onVerify,
+  isVerifying = false,
+  errorMessage = '',
 }: VerificationModalProps) {
   const [code, setCode] = useState('');
   const inputRef = useRef<TextInput>(null);
@@ -39,15 +43,26 @@ export function VerificationModal({
   }, [visible]);
 
   useEffect(() => {
-    if (code.length === 6 && !hasCompletedRef.current) {
+    if (code.length === 6 && !hasCompletedRef.current && !isVerifying) {
       hasCompletedRef.current = true;
       Keyboard.dismiss();
       onVerify(code);
     }
-  }, [code, onVerify]);
+  }, [code, isVerifying, onVerify]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      setCode('');
+      hasCompletedRef.current = false;
+    }
+  }, [errorMessage]);
 
   const handleCodeChange = (text: string) => {
-    // Only allow digits
+    if (isVerifying) {
+      return;
+    }
+
+    // Only allow digits.
     const digits = text.replace(/[^0-9]/g, '');
     if (digits.length <= 6) {
       setCode(digits);
@@ -55,7 +70,9 @@ export function VerificationModal({
   };
 
   const handleBoxPress = () => {
-    inputRef.current?.focus();
+    if (!isVerifying) {
+      inputRef.current?.focus();
+    }
   };
 
   const codeLength = code.length;
@@ -72,7 +89,11 @@ export function VerificationModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Overlay */}
-        <Pressable className="absolute inset-0 bg-overlay" onPress={onClose} />
+        <Pressable
+          className="absolute inset-0 bg-overlay"
+          onPress={onClose}
+          disabled={isVerifying}
+        />
 
         {/* Modal Card */}
         <View className="bg-white rounded-t-3xl px-6 pt-8 pb-10">
@@ -80,6 +101,7 @@ export function VerificationModal({
           <Pressable
             className="absolute top-4 right-4 w-8 h-8 items-center justify-center"
             onPress={onClose}
+            disabled={isVerifying}
           >
             <Ionicons name="close" size={24} color="#AFAFAF" />
           </Pressable>
@@ -114,6 +136,7 @@ export function VerificationModal({
             maxLength={6}
             caretHidden
             autoFocus={false}
+            editable={!isVerifying}
           />
 
           {/* Code Input Boxes */}
@@ -121,8 +144,9 @@ export function VerificationModal({
             VERIFICATION CODE
           </Text>
           <Pressable
-            className="flex-row justify-between mb-8"
+            className="flex-row justify-between mb-4"
             onPress={handleBoxPress}
+            disabled={isVerifying}
           >
             {[0, 1, 2, 3, 4, 5].map((index) => {
               const isFilled = index < codeLength;
@@ -151,12 +175,22 @@ export function VerificationModal({
             })}
           </Pressable>
 
+          {errorMessage ? (
+            <Text className="body-sm text-error text-center mb-4">
+              {errorMessage}
+            </Text>
+          ) : null}
+
+          <Text className="body-sm font-poppins-bold text-primary text-center mb-4">
+            {isVerifying ? 'VERIFYING...' : ' '}
+          </Text>
+
           {/* Resend Link */}
           <View className="flex-row justify-center">
             <Text className="body-sm text-text-secondary">
               {"Didn't receive the code?"}{' '}
             </Text>
-            <Pressable>
+            <Pressable disabled={isVerifying}>
               <Text className="body-sm font-poppins-bold text-primary">
                 RESEND
               </Text>
