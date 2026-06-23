@@ -1,6 +1,6 @@
 import '../global.css';
 
-import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
+import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -20,6 +20,33 @@ if (!publishableKey || isPlaceholderPublishableKey) {
 // Keep the splash screen visible until fonts are ready.
 SplashScreen.preventAutoHideAsync();
 
+function RootNavigation({ fontsReady }: { fontsReady: boolean }) {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  useEffect(() => {
+    if (fontsReady && isLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsReady, isLoaded]);
+
+  if (!fontsReady || !isLoaded) {
+    return null;
+  }
+
+  return (
+    <Stack>
+      <Stack.Protected guard={isSignedIn}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!isSignedIn}>
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
@@ -27,23 +54,14 @@ export default function RootLayout() {
     'Poppins-SemiBold': require('../assets/fonts/Poppins-SemiBold.ttf'),
     'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
   });
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontError, fontsLoaded]);
+  const fontsReady = fontsLoaded || Boolean(fontError);
 
-  return fontsLoaded || fontError ? (
+  return (
     <ClerkProvider
       publishableKey={publishableKey ?? ''}
       tokenCache={tokenCache}
     >
-      <ClerkLoaded>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        </Stack>
-      </ClerkLoaded>
+      <RootNavigation fontsReady={fontsReady} />
     </ClerkProvider>
-  ) : null;
+  );
 }

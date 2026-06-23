@@ -1,44 +1,33 @@
-# Next Migration Summary (10)
+# Next Migration Summary (11)
 
 ## Scope completed
 
 - Read and followed `AGENTS.md` before making implementation decisions.
-- Verified existing Clerk and Expo dependencies in `package.json` before considering packages.
-- Confirmed no new packages are needed for the social OAuth flow.
-- Updated `COMPATIBILITY_REPORT.md` before writing OAuth code.
-- Detected the existing Google and Facebook social buttons in `AuthSocialButtons`.
-- Connected only the existing social buttons to Clerk OAuth.
+- Verified existing Clerk, Expo Router, and Expo SDK dependencies in `package.json` before considering packages.
+- Confirmed no new packages are needed for route protection.
+- Updated `COMPATIBILITY_REPORT.md` before writing route protection code.
 - Preserved the existing UI design and NativeWind styling patterns.
+- Used Clerk session state only for auth access decisions.
 
-## Clerk OAuth flow implemented
+## Route protection implemented
 
-- `AuthSocialButtons` now uses Clerk `useSSO()` from `@clerk/clerk-expo`.
-- Existing Google button maps to Clerk strategy `oauth_google`.
-- Existing Facebook button maps to Clerk strategy `oauth_facebook`.
-- No new social login buttons were added.
-- `WebBrowser.maybeCompleteAuthSession()` is called at module scope.
-- Button taps call `startSSOFlow({ strategy, redirectUrl })`.
-- Redirect URL is created with `Linking.createURL('oauth-callback')`, using the existing `duolingoclone` app scheme from `app.json`.
-- If Clerk returns `createdSessionId` and `setActive`, the app activates the session with `setActive({ session: createdSessionId })`.
-- After session activation, the app navigates home with `router.replace('/')`.
-
-## Error and loading behavior
-
-- Duplicate social OAuth attempts are blocked while an OAuth flow is active.
-- OAuth failures show an alert titled `Social sign in failed`.
-- Clerk error messages are surfaced when available.
-- A generic fallback message is shown when Clerk does not provide a specific error.
+- Root navigation now uses Clerk `useAuth()` from `@clerk/clerk-expo`.
+- Route access waits for both app fonts and Clerk auth state before rendering routes.
+- While Clerk session state is loading, no route tree is rendered, preventing unauthorized screen flicker.
+- Authenticated users can access the home route at `/`.
+- Unauthenticated users can access onboarding and auth routes.
+- Expo Router `Stack.Protected` guards private and public route branches declaratively.
+- The auth group `(auth)` remains nested and keeps its existing `sign-in` and `sign-up` screens.
 
 ## Compatibility notes
 
 - Existing `@clerk/clerk-expo` dependency is reused.
-- Existing `expo-web-browser` dependency is reused for the browser OAuth session.
-- Existing `expo-auth-session` support remains available through Clerk's Expo SSO helper.
-- Existing `expo-linking` dependency is reused for the redirect URL.
-- Existing `expo-secure-store` dependency remains the token-cache storage mechanism.
+- Existing `expo-router` dependency is reused.
 - No new dependency was installed.
 - No custom native module, Clerk native module, config plugin, prebuild, EAS build, or development-build-only feature was introduced.
 - Implementation remains compatible with Expo SDK 54 and standard Expo Go.
+- Route protection uses JavaScript Clerk session state and Expo Router navigation configuration only.
+- This implementation should not trigger `Cannot find native module 'ClerkExpo'`.
 
 ## Validation completed
 
@@ -48,7 +37,7 @@
 ## Files touched in this step
 
 - `COMPATIBILITY_REPORT.md`
-- `components/AuthSocialButtons.tsx`
+- `app/_layout.tsx`
 - `NEXT_SUMMARY.md`
 
 ## Not implemented yet

@@ -103,6 +103,45 @@ Specifically, it will not use:
 
 The project already renders through `ClerkProvider` and uses Clerk auth resource APIs. This OAuth update only connects the existing social buttons to `useSSO()` and the Expo WebBrowser auth-session flow. Because no additional native Clerk bridge is introduced, the implementation should not cause Expo Go to fail with `Cannot find native module 'ClerkExpo'`.
 
+## Route protection update
+
+This route protection step will reuse the existing installed stack and will not install new packages.
+
+### Clerk APIs used
+
+- `useAuth()` from `@clerk/clerk-expo`
+- `isLoaded` to wait until Clerk has resolved session state
+- `isSignedIn` to determine whether private or onboarding routes are accessible
+
+These are JavaScript React hooks from the existing Clerk Expo package. They do not require a custom native module, development build, EAS build, prebuild, config plugin, or handwritten native code.
+
+### Expo Router APIs used
+
+- `Stack` from `expo-router`
+- `Stack.Protected` from `expo-router`
+
+`Stack.Protected` is an Expo Router route protection pattern available in the installed Expo Router version. It protects routes declaratively from the root navigator instead of redirecting after a screen has already rendered.
+
+### Flicker prevention decision
+
+The protected navigator will render only after Clerk session state is loaded:
+
+- While Clerk is still loading, the app renders no routes.
+- After Clerk loads, authenticated users can access the home route.
+- After Clerk loads, unauthenticated users can access onboarding and auth routes.
+
+This avoids unauthorized screens flashing briefly before auth redirects complete.
+
+### Why this remains Expo Go compatible
+
+This implementation uses only:
+
+- existing `@clerk/clerk-expo`
+- existing `expo-router`
+- React render state from Clerk session hooks
+
+It does not add or use any Clerk native module. Because route protection depends only on `useAuth()` session state and Expo Router's JavaScript navigator configuration, it will not trigger `Cannot find native module 'ClerkExpo'`.
+
 ## Implementation decision
 
 Proceed with the existing Expo Go-compatible stack:
@@ -112,10 +151,12 @@ Proceed with the existing Expo Go-compatible stack:
 - Keep `expo-web-browser`.
 - Keep `expo-auth-session`.
 - Keep `expo-linking`.
+- Keep `expo-router`.
 - Do not install packages.
-- Do not add new social login buttons.
-- Preserve the current social button UI and NativeWind classes.
-- Connect only the existing Google and Facebook buttons to Clerk OAuth.
-- Use `useSSO().startSSOFlow()` with `oauth_google` and `oauth_facebook`.
-- Use the existing `duolingoclone` app scheme for redirects.
-- Activate the returned Clerk session after successful OAuth.
+- Do not add native modules.
+- Do not add config plugins.
+- Do not prebuild.
+- Preserve the current UI and NativeWind classes.
+- Use `useAuth()` session state only for route access.
+- Use `Stack.Protected` to guard private and public route groups.
+- Wait for Clerk auth state before rendering protected routes.
