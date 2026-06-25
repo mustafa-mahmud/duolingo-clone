@@ -3,7 +3,7 @@ import '../global.css';
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
@@ -20,8 +20,10 @@ if (!publishableKey || isPlaceholderPublishableKey) {
 // Keep the splash screen visible until fonts are ready.
 SplashScreen.preventAutoHideAsync();
 
-function RootNavigation({ fontsReady }: { fontsReady: boolean }) {
+function AuthGate({ fontsReady }: { fontsReady: boolean }) {
   const { isLoaded, isSignedIn } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     if (fontsReady && isLoaded) {
@@ -29,21 +31,41 @@ function RootNavigation({ fontsReady }: { fontsReady: boolean }) {
     }
   }, [fontsReady, isLoaded]);
 
-  if (!fontsReady || !isLoaded) {
-    return null;
-  }
+  useEffect(() => {
+    if (!fontsReady || !isLoaded) {
+      return;
+    }
 
+    const isAuthCallbackRoute = pathname === '/oauth-callback';
+    const isPublicRoute =
+      pathname === '/onboarding' ||
+      pathname.startsWith('/sign-') ||
+      isAuthCallbackRoute;
+
+    if (isSignedIn && pathname !== '/' && !isAuthCallbackRoute) {
+      router.replace('/');
+      return;
+    }
+
+    if (!isSignedIn && !isPublicRoute) {
+      router.replace('/onboarding');
+    }
+  }, [fontsReady, isLoaded, isSignedIn, pathname, router]);
+
+  return null;
+}
+
+function RootNavigation({ fontsReady }: { fontsReady: boolean }) {
   return (
-    <Stack>
-      <Stack.Protected guard={isSignedIn}>
+    <>
+      <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-      </Stack.Protected>
-
-      <Stack.Protected guard={!isSignedIn}>
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Screen name="oauth-callback" options={{ headerShown: false }} />
+      </Stack>
+      <AuthGate fontsReady={fontsReady} />
+    </>
   );
 }
 

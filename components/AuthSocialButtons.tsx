@@ -46,7 +46,7 @@ export function AuthSocialButtons() {
 
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy,
-        redirectUrl: Linking.createURL('oauth-callback'),
+        redirectUrl: Linking.createURL('/oauth-callback'),
       });
 
       if (createdSessionId && setActive) {
